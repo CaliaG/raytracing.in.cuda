@@ -240,14 +240,14 @@ int main() {
     checkCudaErrors(cudaMalloc((void **)&d_camera, sizeof(camera *)));
 
     // --> SPHERE SCENE
-    int num_objects = 22*22+1+3;      // senza instance
+    /*int num_objects = 22*22+1+3;      // senza instance
     //int num_objects = 1;            // con instance
     object **d_list;
     checkCudaErrors(cudaMalloc((void **)&d_list, num_objects*sizeof(object *)));
 
     build_random_scene<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
     checkCudaErrors(cudaGetLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
+    checkCudaErrors(cudaDeviceSynchronize());*/
     // <-- SPHERE SCENE
 
     // --> SIMPLE LIGHT
@@ -260,6 +260,17 @@ int main() {
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaDeviceSynchronize());*/
     // <-- SIMPLE LIGHT
+
+    // --> CORNEL BOX
+    ns = 500;
+    int num_objects = 2;
+    object **d_list;
+    checkCudaErrors(cudaMalloc((void **)&d_list, num_objects*sizeof(object *)));
+
+    build_cornel_box<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
+    checkCudaErrors(cudaGetLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+    // <-- CORNEL BOX
 
     float time;
     cudaEvent_t start, stop;
