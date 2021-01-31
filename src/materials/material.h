@@ -40,7 +40,7 @@ __device__ vector3D random_in_unit_sphere(curandState *local_rand_state) {
 
 class material  {
     public:
-        __device__ virtual bool scatter(const ray& r_in, const hit_record& rec, vector3D& attenuation, ray& scattered, curandState *local_rand_state) const = 0;
+        __device__ virtual bool scatter(const ray& r_in, const hit_record& rec, vector3D& attenuation, ray& scattered, curandState *local_rand_state) const { return false; }
         __device__ virtual bool transmitted(const ray& r_in, const hit_record& rec, vector3D& attenuation, ray& scattered, curandState *local_rand_state) const { return false; }
         __device__ virtual vector3D emitted(const ray& r_in, const hit_record& rec, float u, float v, const point3D& p) const { return vector3D(0, 0, 0); }
 	
@@ -133,9 +133,9 @@ public:
     float ref_idx;
 };
 
-class diffuse_light : public material {
+class diffuseLight : public material {
 public:
-    __device__ diffuse_light(Texture *a) : emit(a) {}
+    __device__ diffuseLight(Texture *a) : emit(a) {}
 
     __device__ virtual vector3D emitted(const ray& r_in, const hit_record& rec, float u, float v, const point3D& p) const {
         if (dot(rec.normal, r_in.direction()) < 0.0)

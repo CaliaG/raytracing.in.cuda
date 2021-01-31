@@ -21,6 +21,8 @@ INCS = src/cameras/camera.h \
        src/geometries/object_list.h \
        src/geometries/instance.h \
        src/geometries/sphere.h \
+       src/geometries/triangle.h \
+       src/geometries/rectangle.h \
        src/materials/material.h \
        src/utilities/ray.h \
        src/utilities/texture.h \
