@@ -179,7 +179,7 @@ __global__ void build_simple_light(object** obj_list, object** d_world, camera**
 }
 
 // ---- CORNEL BOX
-__device__ void cornel_box(object **d_list, object **d_world, curandState *state) {
+__device__ void cornel_box_instance(object **d_list, object **d_world, curandState *state) {
     material *red = new lambertianTexture(new constantTexture(vector3D(0.65, 0.05, 0.05)));
     material *white = new lambertianTexture(new constantTexture(vector3D(0.73, 0.73, 0.73)));
     material *green = new lambertianTexture(new constantTexture(vector3D(0.12, 0.45, 0.15)));
@@ -229,6 +229,47 @@ __device__ void cornel_box(object **d_list, object **d_world, curandState *state
     sphere_ptr->scale(100.0f, 100.0f, 100.0f);
     sphere_ptr->translate(400, 100, 200);
     d_list[i++] = sphere_ptr;
+
+    //object* model3d = new mesh("../models/bunny2.obj", "../models/");
+    //instance* mesh_ptr = new instance(model3d, light);
+    //mesh_ptr->scale(900.0f, 900.0f, 900.0f);
+    //mesh_ptr->rotate_y(90.0f);
+    //mesh_ptr->translate(250.0f, 150.0f, 500.0f);
+    //d_list[i++] = mesh_ptr;
+    
+    *d_world = new object_list(d_list, i);
+}
+
+__device__ void cornel_box(object **d_list, object **d_world, curandState *state) {
+    material *red = new lambertianTexture(new constantTexture(vector3D(0.65, 0.05, 0.05)));
+    material *white = new lambertianTexture(new constantTexture(vector3D(0.73, 0.73, 0.73)));
+    material *green = new lambertianTexture(new constantTexture(vector3D(0.12, 0.45, 0.15)));
+    material *light = new diffuseLight(new constantTexture(vector3D(2, 2, 2)));
+    
+    int i = 0;
+    d_list[i++] = new rectangle(point3D(343.0, 548.8, 227.0), point3D(343.0, 548.8, 332.0), point3D(213.0, 548.8, 332.0), point3D(213.0, 548.8, 227.0), light);;
+
+    // Back wall
+    d_list[i++] = new rectangle(point3D(549.6, 0.0, 559.2), point3D(0.0, 0.0, 559.2), point3D(0.0, 548.8, 559.2), point3D(556.0, 548.8, 559.2), white);
+
+    // Right wall
+    d_list[i++] = new rectangle(point3D(0.0, 0.0, 559.2), point3D(0.0, 0.0, 0.0), point3D(0.0, 548.8, 0.0), point3D(0.0, 548.8, 559.2), green);
+
+    // Left wall
+    d_list[i++] = new rectangle(point3D(552.8, 0.0, 0.0), point3D(549.6, 0.0, 559.2), point3D(556.0, 548.8, 559.2), point3D(556.0, 548.8, 0.0), red);
+
+    // Ceiling
+    d_list[i++] = new rectangle(point3D(556.0, 548.8, 0.0), point3D(556.0, 548.8, 559.2), point3D(0.0, 548.8, 559.2), point3D(0.0, 548.8, 0.0), white);
+
+    // Floor
+    d_list[i++] = new rectangle(point3D(552.8, 0.0, 0.0), point3D(0.0, 0.0, 0.0), point3D(0.0, 0.0, 559.2), point3D(549.6, 0.0, 559.2), white);
+
+    //sphere_ptr = new instance(sphere_model, new lambertian(new constant_texture(vector3D(0.4f, 0.2f, 0.1f))));
+    //sphere_ptr = new instance(sphere_model, new metal(vector3D(0.7f, 0.6f, 0.5f), 0.0f));
+    d_list[i++] = new sphere(point3D(150, 150, 250), 100.0f, new dielectric(1.5f));
+
+    //sphere_ptr = new instance(sphere_model, new diffuse_light(new constant_texture(vector3D(4.0f, 4.0f, 4.0f))));
+    d_list[i++] = new sphere(point3D(400, 100, 200), 100.0f, new metal(vector3D(0.7f, 0.6f, 0.5f), 0.0f));
 
     //object* model3d = new mesh("../models/bunny2.obj", "../models/");
     //instance* mesh_ptr = new instance(model3d, light);

@@ -60,7 +60,7 @@ __device__ vector3D shot(const ray& r, object **world, int depth, curandState *l
     ray cur_ray = r;
     vector3D cur_attenuation = vector3D(1.0,1.0,1.0);
     vector3D cur_emitted = vector3D(0.0,0.0,0.0);
-    for(int i = 0; i < 12; i++) {
+    for(int i = 0; i < 8; i++) {
       hit_record rec;
       if ((*world)->hit(cur_ray, 0.001f, FLT_MAX, rec)) { // equivalente di trace_ray
           ray scattered;
@@ -153,10 +153,13 @@ __global__ void render_bkp(vector3D *fb, int max_x, int max_y, int ns, camera **
     fb[pixel_index] = col;
 }
 
-__global__ void free_world(object **d_list, object **d_world, camera **d_camera, int obj_cnt) {
-    for(int i=0; i < obj_cnt; i++) {
+__global__ void destroy(object **d_list, object **d_world, camera **d_camera, int obj_cnt) {
+    /*for(int i = 0; i < obj_cnt; i++) {
         delete ((sphere *)d_list[i])->mat_ptr;
         delete d_list[i];
+    }*/
+    for (int i = 0; i < obj_cnt; i++) {
+        delete *(d_list + i);
     }
     delete *d_world;
     delete *d_camera;
@@ -263,7 +266,7 @@ int main() {
 
     // --> CORNEL BOX
     ns = 500;
-    int num_objects = 2;
+    int num_objects = 6*3 + 2;
     object **d_list;
     checkCudaErrors(cudaMalloc((void **)&d_list, num_objects*sizeof(object *)));
 
@@ -301,7 +304,7 @@ int main() {
 
     // clean up
     checkCudaErrors(cudaDeviceSynchronize());
-    free_world<<<1,1>>>(d_list,d_world,d_camera, num_objects);
+    destroy<<<1,1>>>(d_list,d_world,d_camera, num_objects);
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaFree(d_camera));
     checkCudaErrors(cudaFree(d_world));
