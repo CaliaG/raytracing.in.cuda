@@ -28,6 +28,22 @@ public:
         norm = normalize(cross(v1 - v0, v2 - v0));
     };
 
+    __device__ triangle(point3D _vertices[3], material *m) {
+        v0 = _vertices[0];
+        v1 = _vertices[1];
+        v2 = _vertices[2];
+        norm = normalize(cross(v1 - v0, v2 - v0));
+        mat_ptr = m;
+    };
+
+    __device__ triangle(point3D _v0, point3D _v1, point3D _v2, material *m) {
+        v0 = _v0;
+        v1 = _v1;
+        v2 = _v2;
+        norm = normalize(cross(v1 - v0, v2 - v0));
+        mat_ptr = m;
+    };
+
     __device__ virtual bool hit(const ray& r, float tmin, float tmax, hit_record &rec) const;
     __device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const;
     __device__ virtual bool bounding_box(aabb& box) const;
@@ -35,6 +51,7 @@ public:
 protected:
     point3D v0, v1, v2;
     vector3D norm;
+    material *mat_ptr;
 };
 
 __device__ bool triangle::bounding_box(aabb& box) const {
@@ -92,6 +109,7 @@ __device__ bool triangle::hit(const ray& r, float tmin, float tmax, hit_record &
             rec.normal = norm;
             rec.t = dot((v0 - r.o), norm) / dot(r.direction(), norm);
             rec.p = intersPoint;
+            rec.mat_ptr = mat_ptr;
             return true;
         }
     }
