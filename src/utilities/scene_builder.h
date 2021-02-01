@@ -19,9 +19,10 @@
 
 #define RND (curand_uniform(&local_rand_state))
 
-__device__ float rand(curandState *state){
-    return float(curand_uniform(state));
-}
+// ereditato da bvh.h
+// __device__ float rand(curandState *state){
+//     return float(curand_uniform(state));
+// }
 
 // ---- SPHERE SCENE
 __device__ void random_scene(object **d_list, object **d_world, curandState *state) {

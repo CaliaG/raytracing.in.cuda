@@ -8,6 +8,10 @@
 
 struct hit_record;
 
+__device__ float rand(curandState *state){
+    return float(curand_uniform(state));
+}
+
 struct boxCompare {
     __device__ boxCompare(int m): mode(m) {}
     __device__ bool operator()(object* a, object* b) const {
@@ -55,7 +59,7 @@ public:
 };
 
 __device__ bvhNode::bvhNode(object **d_list, int n, curandState *state) {
-    int axis = int(3 * curand_uniform(state));
+    int axis = int(3 * rand(state));
 
     if (axis == 0){
         thrust::sort(d_list, d_list + n, boxCompare(1));
