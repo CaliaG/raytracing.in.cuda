@@ -209,7 +209,7 @@ void save_to_ppm(vector3D *fb, int nx, int ny) {
 int main() {
     int nx = 1200;
     int ny = 800;
-    int ns = 50;
+    int ns = 32;
     int tx = 16;
     int ty = 16;
 
@@ -242,16 +242,32 @@ int main() {
     camera **d_camera;
     checkCudaErrors(cudaMalloc((void **)&d_camera, sizeof(camera *)));
 
+    float time;
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    cudaEventRecord(start, 0);
     // --> SPHERE SCENE
-    /*int num_objects = 22*22+1+3;      // senza instance
-    //int num_objects = 1;            // con instance
+    //int num_objects = 22*22+1+3;      // senza instance
+    ////int num_objects = 1;            // con instance
+    //object **d_list;
+    //checkCudaErrors(cudaMalloc((void **)&d_list, num_objects*sizeof(object *)));
+    
+    //build_random_scene<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
+    //checkCudaErrors(cudaGetLastError());
+    //checkCudaErrors(cudaDeviceSynchronize());
+    // <-- SPHERE SCENE
+
+    // --> BVH - SPHERE SCENE
+    int num_objects = 22*22+1+3 + 1;
     object **d_list;
     checkCudaErrors(cudaMalloc((void **)&d_list, num_objects*sizeof(object *)));
-
-    build_random_scene<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
+    
+    build_bvh<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
     checkCudaErrors(cudaGetLastError());
-    checkCudaErrors(cudaDeviceSynchronize());*/
-    // <-- SPHERE SCENE
+    checkCudaErrors(cudaDeviceSynchronize());
+    // <-- BVH - SPHERE SCENE
 
     // --> SIMPLE LIGHT
     /*ns = 500;
@@ -265,20 +281,19 @@ int main() {
     // <-- SIMPLE LIGHT
 
     // --> CORNEL BOX
-    ns = 500;
+    /*ns = 500;
     int num_objects = 6*3 + 2;
     object **d_list;
     checkCudaErrors(cudaMalloc((void **)&d_list, num_objects*sizeof(object *)));
 
     build_cornel_box<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
     checkCudaErrors(cudaGetLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
+    checkCudaErrors(cudaDeviceSynchronize());*/
     // <-- CORNEL BOX
-
-    float time;
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&time, start, stop);
+    std::cerr << "build scene took: " << time / 1000 << " seconds\n";
 
     cudaEventRecord(start, 0);
 
@@ -289,6 +304,13 @@ int main() {
     render_init<<<blocks, threads>>>(nx, ny, d_rand_state);
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaDeviceSynchronize());
+
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&time, start, stop);
+    std::cerr << "render init took: " << time / 1000 << " seconds\n";
+
+    cudaEventRecord(start, 0);
 
     render<<<blocks, threads>>>(fb, nx, ny,  ns, d_camera, d_world, d_rand_state);
     checkCudaErrors(cudaGetLastError());
@@ -304,7 +326,7 @@ int main() {
 
     // clean up
     checkCudaErrors(cudaDeviceSynchronize());
-    destroy<<<1,1>>>(d_list,d_world,d_camera, num_objects);
+    destroy<<<1,1>>>(d_list, d_world, d_camera, num_objects);
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaFree(d_camera));
     checkCudaErrors(cudaFree(d_world));

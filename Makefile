@@ -23,6 +23,8 @@ INCS = src/cameras/camera.h \
        src/geometries/sphere.h \
        src/geometries/triangle.h \
        src/geometries/rectangle.h \
+       src/geometries/box.h \
+       src/geometries/bvh.h \
        src/materials/material.h \
        src/utilities/ray.h \
        src/utilities/texture.h \
