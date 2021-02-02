@@ -19,10 +19,68 @@
 
 #define RND (curand_uniform(&local_rand_state))
 
-// ereditato da bvh.h
-// __device__ float rand(curandState *state){
-//     return float(curand_uniform(state));
-// }
+// ---- SCENE BALLS
+__device__ void balls_scene(object **d_list, object **d_world, curandState *state) {
+    curandState local_rand_state = *state;
+
+    int i = 0;
+    // sphere 1
+    d_list[i] = new sphere(point3D(0, 0, -1), .5f, new lambertianTexture(new constantTexture(vector3D(0.6, 0.1, 0.1))));
+    d_list[i]->set_id(i);
+    i++;
+    // sphere 2
+    Texture *checker = new checkerTexture(new constantTexture(vector3D(0.5f, 0.7f, 0.8f)), new constantTexture(vector3D(0.9, 0.9, 0.9)));
+    d_list[i] = new sphere(point3D(0, -1000.5, 1), 1000.f, new lambertianTexture(checker));
+    d_list[i]->set_id(i);
+    i++;
+    // sphere 3
+    d_list[i] = new sphere(point3D(1, 0, -1), .5f, new diffuseLight(new constantTexture(vector3D(4.0f, 1.0f, 4.0f))));
+    d_list[i]->set_id(i);
+    i++;
+    // sphere 4
+    d_list[i] = new sphere(point3D(-1, 0, -2), .5f, new metal(vector3D(0.5f*(1.0f + RND), 
+                                                                       0.5f*(1.0f + RND), 
+                                                                       0.5f*(1.0f + RND)), 
+                                                                       0.5f*RND));
+    d_list[i]->set_id(i);
+    i++;
+    // sphere 5
+    d_list[i] = new sphere(point3D(0, 0, -2), .5f, new metal(vector3D(0.5f*(.8f + RND), 
+                                                                      0.5f*(.8f + RND), 
+                                                                      0.5f*(.8f + RND)), 
+                                                                      0.5f*RND));
+    d_list[i]->set_id(i);
+    i++;
+    // sphere 6
+    d_list[i] = new sphere(point3D(1, 0, -2), .5f, new dielectric(1.5));
+    d_list[i]->set_id(i);
+    i++;
+    // sphere 7
+    d_list[i] = new sphere(point3D(-1, 0, -1), .5f, new diffuseLight(new constantTexture(vector3D(0.5f, 1.f, 0.5f))));
+    d_list[i]->set_id(i);
+    i++;
+    // bvh node
+    // d_list[i] = new bvh_node(d_list, i, state, 0);
+    // d_list[i]->set_id(i);
+    
+    *d_world = new object_list(d_list, static_cast<bvh_node*>(d_list[i]), i);
+    i++;
+    d_world[0]->set_id(i);
+}
+
+__global__ void build_balls_scene(object** obj_list, object** d_world, camera** d_camera, int nx, int ny, curandState *rand_state) {
+    if (threadIdx.x != 0 || blockIdx.x != 0) return;
+
+    balls_scene(obj_list, d_world, rand_state);
+
+    point3D lookfrom(-1, 1,5);
+    point3D lookat(0,0,-1);
+    //float dist_to_focus = (lookfrom - lookat).length();
+    //float aperture = .25f;
+    float vfov = 20.f;
+    vector3D up = vector3D(0,1,0);
+    *d_camera = new camera(lookfrom, lookat, up, vfov, float(nx) / float(ny)/*, aperture, dist_to_focus*/);
+}
 
 // ---- SPHERE SCENE
 __device__ void random_scene(object **d_list, object **d_world, curandState *state) {
