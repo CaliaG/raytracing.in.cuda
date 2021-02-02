@@ -44,8 +44,6 @@ public:
         mat_ptr = m;
     };
 
-    __device__ virtual ~triangle() noexcept override;
-
     __device__ virtual bool hit(const ray& r, float tmin, float tmax, hit_record &rec) const;
     __device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const;
     __device__ virtual bool bounding_box(aabb& box) const;
@@ -57,10 +55,6 @@ protected:
     vector3D norm;
     material *mat_ptr;
 };
-
-__device__ triangle::~triangle() noexcept {
-    if (mat_ptr) { delete mat_ptr; }
-}
 
 __device__ bool triangle::bounding_box(aabb& box) const {
     box.pmax = point3D(FLT_MIN, FLT_MIN, FLT_MIN);

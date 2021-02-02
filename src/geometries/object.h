@@ -18,7 +18,6 @@ struct hit_record
 class object  {
 public:
     __device__ object() {}
-    __device__ virtual ~object() noexcept {}
 
     __device__ virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const = 0;
 	__device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const = 0;

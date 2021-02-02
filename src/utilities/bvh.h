@@ -28,8 +28,6 @@ public:
         return (_left->is_leaf() || _right->is_leaf());
     }
 
-    __device__ virtual ~bvh_node() noexcept;
-
 private:
     object* _left = nullptr;
     object* _right = nullptr;
@@ -147,10 +145,6 @@ __device__ bool bvh_node::dfs(const ray& r, float tmin, float tmax, hit_record& 
 __device__ bool bvh_node::bounding_box(aabb& box) const {
     box = _box;
     return true;
-}
-
-__device__ bvh_node::~bvh_node() noexcept {
-    //printf("Deleting BVH_NODE object at %p\n", this);
 }
 
 // __device__ void bvh_node::display_tree(bvh_node* root, int level) {

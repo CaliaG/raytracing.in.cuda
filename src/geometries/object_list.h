@@ -8,7 +8,6 @@ public:
     __device__ object_list() {}
     __device__ object_list(object **l, bvh_node* bvh_node, uint32_t size) {list = l; bvh = bvh_node; list_size = size; }
     __device__ object_list(object **l, uint32_t size) {list = l; list_size = size; }
-    __device__ ~object_list() noexcept override;
     
     __device__ virtual bool hit(const ray& r, float tmin, float tmax, hit_record& rec) const;
     __device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const;
@@ -21,12 +20,6 @@ private:
     bvh_node* bvh;
     uint32_t list_size;
 };
-
-__device__ object_list::~object_list() noexcept {
-    for (uint32_t i = 0; i < list_size; ++i) {
-        delete* (list + i);
-    }
-}
 
 __device__ constexpr object* object_list::get_object(uint32_t id) {
     for (uint32_t i = 0; i < list_size; ++i) {

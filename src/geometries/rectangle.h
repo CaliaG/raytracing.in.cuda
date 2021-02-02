@@ -12,7 +12,6 @@ public:
     __device__ rectangle() {}
     __device__ rectangle(point3D v0, point3D v1, point3D v2, point3D v3) : tri_a(v0, v1, v3), tri_b(v1, v2, v3) {};
     __device__ rectangle(point3D v0, point3D v1, point3D v2, point3D v3, material *m) : tri_a(v0, v1, v3, m), tri_b(v1, v2, v3, m), mat_ptr(m) {};
-    __device__ virtual ~rectangle() noexcept override;
 
     __device__ virtual bool hit(const ray& r, float t0, float t1, hit_record& rec) const;
     __device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const;
@@ -32,10 +31,6 @@ public:
     triangle tri_a, tri_b;
     material *mat_ptr;
 };
-
-__device__ rectangle::~rectangle() noexcept {
-    if (mat_ptr) { delete mat_ptr; }
-}
 
 __device__ bool rectangle::hit(const ray& r, float tmin, float tmax, hit_record &rec) const {
     if (tri_a.hit(r, tmin, tmax, rec))

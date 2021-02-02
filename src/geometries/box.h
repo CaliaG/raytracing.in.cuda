@@ -17,7 +17,6 @@ public:
         pmax = max;
         mat_ptr = m;
     }
-    __device__ virtual ~box() noexcept override;
 
     __device__ virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
     __device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const;
@@ -30,10 +29,6 @@ public:
     point3D pmax;
     material *mat_ptr;
 };
-
-__device__ box::~box() noexcept {
-    if (mat_ptr) { delete mat_ptr; }
-}
 
 __device__ bool box::hit(const ray& r, float tmin, float tmax, hit_record &rec) const {
     for (int i = 0; i < 3; i++) {
