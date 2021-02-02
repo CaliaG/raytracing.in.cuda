@@ -11,6 +11,11 @@
 #include "src/cameras/camera.h"
 #include "src/materials/material.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "libs/stb/stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "libs/stb/stb_image_write.h"
+
 // limited version of checkCudaErrors from helper_cuda.h in CUDA examples
 #define checkCudaErrors(val) check_cuda( (val), #val, __FILE__, __LINE__ )
 
@@ -318,6 +323,29 @@ int main() {
 
     // Output FB as Image
     save_to_ppm(fb, nx, ny);
+
+    // Output FB as JPG
+    // --> jpg
+    // uint8_t* imgBuff = (uint8_t*)std::malloc(nx * ny * 3 * sizeof(uint8_t));
+    // for (int j = ny - 1; j >= 0; --j) {
+    //     for (int i = 0; i < nx; ++i) {
+    //         size_t index = utils::XY(i, j);
+    //         // stbi generates a Y flipped image
+    //         size_t rev_index = utils::XY(i, HEIGHT - j - 1);
+    //         float r = frameBuffer_u[index].r();
+    //         float g = frameBuffer_u[index].g();
+    //         float b = frameBuffer_u[index].b();
+    //         imgBuff[rev_index * 3 + 0] = int(255.999f * r) & 255;
+    //         imgBuff[rev_index * 3 + 1] = int(255.999f * g) & 255;
+    //         imgBuff[rev_index * 3 + 2] = int(255.999f * b) & 255;
+    //     }
+    // }
+
+    // stbi_write_png("render.png", nx, ny, 3, imgBuff, nx * 3);
+    // stbi_write_jpg("out.jpg", nx, ny, 3, imgBuff, 100);
+    // std::free(imgBuff);
+    // <-- jpg
+
 
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);

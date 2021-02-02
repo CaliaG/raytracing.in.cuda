@@ -9,10 +9,11 @@ public:
 		    radius = 1.0f;
     }
     __device__ sphere(point3D cen, float r, material *m) : center(cen), radius(r), mat_ptr(m)  {};
-    
+    __device__ virtual ~sphere() noexcept override;
+
     __device__ virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
-	  __device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const;
-	  __device__ virtual bool bounding_box(aabb& box) const;
+    __device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const;
+    __device__ virtual bool bounding_box(aabb& box) const;
 
 //protected:
 public:
@@ -20,6 +21,10 @@ public:
     float radius;
     material *mat_ptr;
 };
+
+__device__ sphere::~sphere() noexcept {
+    if (mat_ptr) { delete mat_ptr; }
+}
 
 __device__ bool sphere::bounding_box(aabb& box) const {
 	box = aabb(center - vector3D(radius, radius, radius), center + vector3D(radius, radius, radius));

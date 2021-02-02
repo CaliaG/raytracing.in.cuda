@@ -8,6 +8,8 @@
 class instance : public object {
 public:    
     __device__ instance(object* nobj_ptr, material* m);
+    __device__ virtual ~instance() noexcept override;
+
     __device__ instance* clone(void) const;
         
     __device__ virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
@@ -40,6 +42,10 @@ private:
     matrix4D            current_matrix;        // current transformation matrix
     material            *mat;                  // material                    
 };
+
+__device__ instance::~instance() noexcept {
+    if (mat_ptr) { delete mat_ptr; }
+}
 
 __device__ instance* instance::clone(void) const {
     return (new instance(*this));

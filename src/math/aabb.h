@@ -6,7 +6,10 @@
 class aabb {
 
 public:
-    __device__ aabb() {};
+    __device__ aabb() {
+        pmin = point3D(FLT_MAX, FLT_MAX, FLT_MAX);
+        pmax = point3D(FLT_MIN, FLT_MIN, FLT_MIN);
+    };
     __device__ aabb(const point3D& a, const point3D& b) { pmin = a; pmax = b; }
 
     __device__ point3D aabb_min() const { return pmin; }
