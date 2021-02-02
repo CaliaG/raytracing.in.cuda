@@ -211,6 +211,36 @@ void save_to_ppm(vector3D *fb, int nx, int ny) {
     ofs.close();
 }
 
+__host__ __device__ static constexpr int XY(int x, int y, int width) {
+    #ifdef __CUDA_ARCH__
+        return __fmaf_rz(y, width, x);
+    #else
+        return y * width + x;
+    #endif
+}
+
+void save_to_jpg(vector3D *fb, int nx, int ny) {
+    uint8_t* imgBuff = (uint8_t*)std::malloc(nx * ny * 3 * sizeof(uint8_t));
+    for (int j = ny - 1; j >= 0; --j) {
+        for (int i = 0; i < nx; ++i) {
+            //size_t index = utils::XY(i, j);
+            size_t index = XY(i, j, nx);
+            // -- stbi generates a Y flipped image
+            //size_t rev_index = utils::XY(i, HEIGHT - j - 1);
+            size_t rev_index = XY(i, ny - j - 1, nx);
+            float r = fb[index].x();
+            float g = fb[index].y();
+            float b = fb[index].z();
+            imgBuff[rev_index * 3 + 0] = int(255.999f * r) & 255;
+            imgBuff[rev_index * 3 + 1] = int(255.999f * g) & 255;
+            imgBuff[rev_index * 3 + 2] = int(255.999f * b) & 255;
+        }
+    }
+    //stbi_write_png("out.png", nx, ny, 3, imgBuff, nx * 3);
+    stbi_write_jpg("out.jpg", nx, ny, 3, imgBuff, 100);
+    std::free(imgBuff);
+}
+
 int main() {
     int nx = 1200;
     int ny = 800;
@@ -254,24 +284,24 @@ int main() {
 
     cudaEventRecord(start, 0);
     // --> SPHERE SCENE
-    //int num_objects = 22*22+1+3;      // senza instance
-    ////int num_objects = 1;            // con instance
-    //object **d_list;
-    //checkCudaErrors(cudaMalloc((void **)&d_list, num_objects*sizeof(object *)));
-    
-    //build_random_scene<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
-    //checkCudaErrors(cudaGetLastError());
-    //checkCudaErrors(cudaDeviceSynchronize());
-    // <-- SPHERE SCENE
-
-    // --> BVH - SPHERE SCENE
-    int num_objects = 22*22+1+3 + 1;
+    int num_objects = 22*22+1+3;      // senza instance
+    //int num_objects = 1;            // con instance
     object **d_list;
     checkCudaErrors(cudaMalloc((void **)&d_list, num_objects*sizeof(object *)));
     
-    build_bvh<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
+    build_random_scene<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaDeviceSynchronize());
+    // <-- SPHERE SCENE
+
+    // --> BVH - SPHERE SCENE
+    // int num_objects = 22*22+1+3 + 1;
+    // object **d_list;
+    // checkCudaErrors(cudaMalloc((void **)&d_list, num_objects*sizeof(object *)));
+    
+    // build_bvh<<<1,1>>>(d_list, d_world, d_camera, nx, ny, d_rand_state2);
+    // checkCudaErrors(cudaGetLastError());
+    // checkCudaErrors(cudaDeviceSynchronize());
     // <-- BVH - SPHERE SCENE
 
     // --> SIMPLE LIGHT
@@ -321,30 +351,11 @@ int main() {
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaDeviceSynchronize());
 
-    // Output FB as Image
-    save_to_ppm(fb, nx, ny);
+    // -- Output FB as Image
+    //save_to_ppm(fb, nx, ny);
 
-    // Output FB as JPG
-    // --> jpg
-    // uint8_t* imgBuff = (uint8_t*)std::malloc(nx * ny * 3 * sizeof(uint8_t));
-    // for (int j = ny - 1; j >= 0; --j) {
-    //     for (int i = 0; i < nx; ++i) {
-    //         size_t index = utils::XY(i, j);
-    //         // stbi generates a Y flipped image
-    //         size_t rev_index = utils::XY(i, HEIGHT - j - 1);
-    //         float r = frameBuffer_u[index].r();
-    //         float g = frameBuffer_u[index].g();
-    //         float b = frameBuffer_u[index].b();
-    //         imgBuff[rev_index * 3 + 0] = int(255.999f * r) & 255;
-    //         imgBuff[rev_index * 3 + 1] = int(255.999f * g) & 255;
-    //         imgBuff[rev_index * 3 + 2] = int(255.999f * b) & 255;
-    //     }
-    // }
-
-    // stbi_write_png("render.png", nx, ny, 3, imgBuff, nx * 3);
-    // stbi_write_jpg("out.jpg", nx, ny, 3, imgBuff, 100);
-    // std::free(imgBuff);
-    // <-- jpg
+    // -- Output FB as JPG
+    save_to_jpg(fb, nx, ny);
 
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
