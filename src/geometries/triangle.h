@@ -50,6 +50,8 @@ public:
     __device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const;
     __device__ virtual bool bounding_box(aabb& box) const;
 
+    __device__ inline bool is_leaf() const { return true; }
+    
 protected:
     point3D v0, v1, v2;
     vector3D norm;

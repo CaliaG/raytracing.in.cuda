@@ -15,6 +15,8 @@ public:
     __device__ virtual bool hit_shadow(const ray& r, float t_min, float t_max) const;
     __device__ virtual bool bounding_box(aabb& box) const;
 
+    __device__ inline bool is_leaf() const { return true; }
+
 //protected:
 public:
     point3D center;

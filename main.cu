@@ -346,7 +346,6 @@ int main() {
     // std::free(imgBuff);
     // <-- jpg
 
-
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&time, start, stop);

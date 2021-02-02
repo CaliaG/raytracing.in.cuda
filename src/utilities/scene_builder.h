@@ -11,11 +11,11 @@
 #include "../geometries/sphere.h"
 #include "../geometries/rectangle.h"
 #include "../geometries/box.h"
-#include "../geometries/bvh.h"
 #include "../materials/material.h"
 #include "../math/point3D.h"
 #include "../math/vector3D.h"
 #include "../utilities/texture.h"
+#include "../utilities/bvh.h"
 
 #define RND (curand_uniform(&local_rand_state))
 

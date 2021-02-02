@@ -7,6 +7,7 @@ class object_list: public object  {
 public:
     __device__ object_list() {}
     __device__ object_list(object **l, bvh_node* bvh_node, uint32_t size) {list = l; bvh = bvh_node; list_size = size; }
+    __device__ object_list(object **l, uint32_t size) {list = l; list_size = size; }
     __device__ ~object_list() noexcept override;
     
     __device__ virtual bool hit(const ray& r, float tmin, float tmax, hit_record& rec) const;
@@ -37,8 +38,8 @@ __device__ constexpr object* object_list::get_object(uint32_t id) {
 }
 
 __device__ bool object_list::hit(const ray& r, float t_min, float t_max, hit_record& rec) const {
-    if (_bvh) {
-        return(_bvh->dfs(r, tmin, tmax, hrec));
+    if (bvh) {
+        return(bvh->dfs(r, t_min, t_max, rec));
     } else {
         hit_record temp_rec;
         bool hit_anything = false;
@@ -78,9 +79,9 @@ __device__ bool object_list::bounding_box(aabb& box) const {
     }
 
     // we make the bounding box bigger and bigger with each object
-    for (uint32_t i = 1; i < _size; ++i) {
+    for (uint32_t i = 1; i < list_size; ++i) {
         if (list[i]->bounding_box(tempbbox)) {
-            box = aabb::surrounding_box(box, tempbbox);
+            box = surrounding_box(box, tempbbox);
         } else {
             return false;
         }

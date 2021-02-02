@@ -27,6 +27,8 @@ public:
         return true;
     }
     
+    __device__ inline bool is_leaf() const { return true; }
+    
     triangle tri_a, tri_b;
     material *mat_ptr;
 };

@@ -36,6 +36,8 @@ public:
         return(mat);
     }
 
+    __device__ inline bool is_leaf() const { return true; }
+    
 private:
     object              *object_ptr;           // object to be transformed
     matrix4D            inverse_matrix;        // inverse transformation matrix
@@ -44,7 +46,7 @@ private:
 };
 
 __device__ instance::~instance() noexcept {
-    if (mat_ptr) { delete mat_ptr; }
+    if (mat) { delete mat; }
 }
 
 __device__ instance* instance::clone(void) const {
