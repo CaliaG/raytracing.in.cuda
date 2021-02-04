@@ -1,55 +1,35 @@
-CUDA_PATH     ?= /usr/local/cuda
-HOST_COMPILER  = g++
-NVCC           = $(CUDA_PATH)/bin/nvcc -ccbin $(HOST_COMPILER)
+CUDA_PATH?=/usr/local/cuda
+HOST_COMPILER=g++
+NVCC=$(CUDA_PATH)/bin/nvcc -ccbin $(HOST_COMPILER)
 
-# select one of these for Debug vs. Release
-#NVCC_DBG       = -g -G
-NVCC_DBG       =
+NVPROF_FLAGS=--metrics achieved_occupancy,inst_executed,inst_fp_32,inst_fp_64,inst_integer
 
-NVCCFLAGS      = $(NVCC_DBG) -m64
-GENCODE_FLAGS  = -gencode arch=compute_75,code=sm_75		# Tesla T4
-# GENCODE_FLAGS  = -gencode arch=compute_37,code=sm_37		# Tesla K80
+# debug vs release
+NVCCFLAGS_DEBUG= -g -G
+NVCCFLAGS=
 
-SRCS = main.cu
-INCS = src/cameras/camera.h \
-       src/math/vector3D.h \
-       src/math/point3D.h \
-       src/math/matrix4D.h \
-       src/math/aabb.h \
-       src/math/math.h \
-       src/geometries/object.h \
-       src/geometries/object_list.h \
-       src/geometries/instance.h \
-       src/geometries/sphere.h \
-       src/geometries/triangle.h \
-       src/geometries/rectangle.h \
-       src/geometries/box.h \
-       src/materials/material.h \
-       src/utilities/ray.h \
-       src/utilities/texture.h \
-       src/utilities/bvh.h \
-       src/utilities/scene_builder.h
+all: clean main.o compile run
+debug: clean dbg
 
-cudart: cudart.o
-	$(NVCC) $(NVCCFLAGS) $(GENCODE_FLAGS) -o cudart cudart.o
+compile: main.o
+	$(NVCC) $(NVCCFLAGS) -o main main.o
 
-cudart.o: $(SRCS) $(INCS)
-	$(NVCC) $(NVCCFLAGS) $(GENCODE_FLAGS) -o cudart.o -c main.cu
+main.o:
+	$(NVCC) $(NVCCFLAGS) -o main.o -c main.cu
 
-out.ppm: cudart
-	rm -f out.ppm
-	./cudart > out.ppm
+dbg:
+	$(NVCC) $(NVCCFLAGS_DEBUG) -o main.o -c main.cu
+	$(NVCC) $(NVCCFLAGS_DEBUG) -o main main.o
 
-out.jpg: out.ppm
-	rm -f out.jpg
-	ppmtojpeg out.ppm > out.jpg
+run: main
+	rm -f image.jpg
+	./main
 
-profile_basic: cudart
-	nvprof ./cudart > out.ppm
+profile: main
+	nvprof ./main
 
-# use nvprof --query-metrics
-profile_metrics: cudart
-	nvprof --metrics achieved_occupancy,inst_executed,inst_fp_32,inst_fp_64,inst_integer ./cudart > out.ppm
+profile_metrics: main
+	nvprof $(NVPROF_FLAGS) ./main
 
 clean:
-	rm -f cudart cudart.o out.ppm out.jpg
+	rm -f main main.o image.jpg image.ppm image.png
