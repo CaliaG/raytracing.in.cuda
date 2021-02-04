@@ -197,7 +197,7 @@ void get_device_props() {
 
 void save_to_ppm(vector3D *fb, int nx, int ny) {
     std::ofstream ofs;
-    ofs.open("./out.ppm", std::ios::out | std::ios::binary);
+    ofs.open("./image.ppm", std::ios::out | std::ios::binary);
     ofs << "P3\n" << nx << " " << ny << "\n255\n";
         for (int j = ny-1; j >= 0; j--) {
             for (int i = 0; i < nx; i++) {
@@ -236,8 +236,8 @@ void save_to_jpg(vector3D *fb, int nx, int ny) {
             imgBuff[rev_index * 3 + 2] = int(255.999f * b) & 255;
         }
     }
-    //stbi_write_png("out.png", nx, ny, 3, imgBuff, nx * 3);
-    stbi_write_jpg("out.jpg", nx, ny, 3, imgBuff, 100);
+    //stbi_write_png("image.png", nx, ny, 3, imgBuff, nx * 3);
+    stbi_write_jpg("image.jpg", nx, ny, 3, imgBuff, 100);
     std::free(imgBuff);
 }
 
