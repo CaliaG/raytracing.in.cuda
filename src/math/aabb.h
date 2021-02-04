@@ -9,8 +9,14 @@ public:
     __device__ aabb() {
         pmin = point3D(FLT_MAX, FLT_MAX, FLT_MAX);
         pmax = point3D(FLT_MIN, FLT_MIN, FLT_MIN);
+        centroid = (pmin + pmax) * .5f;
     };
-    __device__ aabb(const point3D& a, const point3D& b) { pmin = a; pmax = b; }
+
+    __device__ aabb(const point3D& a, const point3D& b) { 
+        pmin = a;
+        pmax = b;
+        centroid = (pmin + pmax) * .5f;
+    }
 
     __device__ point3D aabb_min() const { return pmin; }
     __device__ point3D aabb_max() const { return pmax; }
@@ -31,6 +37,7 @@ public:
 
     point3D pmin;
     point3D pmax;
+	point3D centroid;
 };
 
 __device__ aabb surrounding_box(aabb box0, aabb box1) {
